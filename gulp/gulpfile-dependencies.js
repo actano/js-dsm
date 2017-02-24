@@ -16,7 +16,7 @@ import { parse } from './dependencies'
 
 const { gray } = colors
 
-const TARGET = resolve(process.env.TARGET)
+const TARGET = resolve(process.env.TARGET || process.cwd())
 
 let result = null
 
