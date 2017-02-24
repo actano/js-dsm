@@ -45,8 +45,7 @@ class Node {
 }
 
 const dsm = (data) => {
-  const { root, cycles } = data
-  console.log(cycles[0].join(' -> ')) // eslint-disable-line no-console
+  const { root } = data
 
   const selection = []
   for (const node of root.children) {
