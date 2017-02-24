@@ -4,13 +4,21 @@ import through from 'through2'
 import { replaceExtension, PluginError } from 'gulp-util'
 import relative from 'require-relative'
 
+const pugOrJade = (filename) => {
+  try {
+    return relative('pug', filename)
+  } catch (e) {
+    return relative('jade', filename)
+  }
+}
+
 export default function (options) {
   const opts = Object.assign({}, options)
   opts.data = Object.assign(opts.data || {}, opts.locals || {})
 
   return through.obj((file, enc, cb) => {
     opts.filename = file.history[0]
-    const pug = relative('jade', opts.filename)
+    const pug = pugOrJade(opts.filename)
     file.path = replaceExtension(file.path, '.js')
 
     try {
