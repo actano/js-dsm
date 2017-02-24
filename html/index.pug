@@ -1,0 +1,29 @@
+doctype html
+html
+    head
+        style.
+            .chart rect {
+            }
+            .chart text {
+                /*fill: black;*/
+                font: 5px sans-serif;
+                /*text-anchor: start*/
+            }
+            .chart .axisLeft text {
+                text-anchor: end
+            }
+            .chart .axisTop text {
+                text-anchor: start
+            }
+            .chart .table text {
+                text-anchor: middle
+            }
+            .chart .table rect {
+                stroke: #eee;
+                stroke-width: 0.5px;
+            }
+
+    body
+        svg.chart
+
+    script(src='d3.js')
