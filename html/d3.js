@@ -1,3 +1,4 @@
+import 'babel-polyfill'
 import * as d3 from 'd3' // eslint-disable-line import/no-unresolved, import/extensions
 import { interpolateReds, interpolateGreens } from 'd3-scale-chromatic'
 import { dirname, basename } from 'path'
