@@ -2,6 +2,7 @@ import 'babel-polyfill'
 import * as d3 from 'd3' // eslint-disable-line import/no-unresolved, import/extensions
 import { interpolateReds, interpolateGreens } from 'd3-scale-chromatic'
 import { dirname, basename } from 'path'
+import createLowerLeftDsm from './dsm'
 
 class Node {
   constructor(path) {
@@ -10,15 +11,10 @@ class Node {
     this.children = []
     this.dependencies = []
     this.reverseDependencies = []
-    this._depth = NaN
   }
 
   get path() {
     return this.parent ? `${this.parent.path}/${this.name}` : this.name
-  }
-
-  get depth() {
-    return Math.max(this._depth, ...this.children.map(child => child.depth))
   }
 
   dependOn(node) {
@@ -40,7 +36,7 @@ class Node {
   }
 
   toString() {
-    return `${this.path} (${this.depth})`
+    return `${this.path}`
   }
 }
 
@@ -51,36 +47,29 @@ const dsm = (data) => {
   for (const node of root.children) {
     selection.push(...node.children)
   }
-  selection.sort((a, b) => b.depth - a.depth)
 
-  const deps = (fromNode, toNode) => {
-    if (fromNode === toNode) return NaN
-    let result = 0
-    for (const dep of fromNode.allDependencies()) {
-      if (dep.isChildOf(toNode)) result += 1
-    }
-    return result
-  }
-  const yAxisData = selection
-  const xAxisData = selection
-  const matrix = yAxisData.map(y => xAxisData.map(x => deps(x, y)))
   const headWidth = 80
+  const cellSize = 20
+  const totalSize = headWidth + (selection.length * cellSize)
+  const { matrix, dsmNodes } = createLowerLeftDsm(selection)
+  const xAxisData = dsmNodes
+  const yAxisData = dsmNodes
 
   const xScale = d3.scaleBand()
     .domain(xAxisData)
-    .range([headWidth, 2048])
+    .range([headWidth, totalSize])
 
   const yScale = d3.scaleBand()
     .domain(yAxisData)
-    .range([headWidth, 2048])
+    .range([headWidth, totalSize])
 
-  const maxDeps = d3.max(matrix, row => d3.max(row))
-  const redScale = d3.scaleSequential(interpolateReds).domain([1, maxDeps])
-  const greenScale = d3.scaleSequential(interpolateGreens).domain([1, maxDeps])
+  const maxDeps = d3.max(matrix, row => d3.max(row, x => x.deps))
+  const redScale = d3.scaleSequential(interpolateReds).domain([0, maxDeps + 1])
+  const greenScale = d3.scaleSequential(interpolateGreens).domain([0, maxDeps + 1])
 
   const chart = d3.select('.chart')
-    .attr('width', 2048)
-    .attr('height', 2048)
+    .attr('width', totalSize)
+    .attr('height', totalSize)
 
   chart.append('g').attr('class', 'axisLeft').attr('transform', `translate(${headWidth},0)`)
     .selectAll('g')
@@ -117,8 +106,14 @@ const dsm = (data) => {
         .attr('width', xScale.bandwidth())
         .attr('height', yScale.bandwidth())
         .attr('fill', (xNode, x) => {
-          const value = matrix[y][x]
+          const value = matrix[y][x].deps
+          if (x === y) {
+            return 'rgb(128, 128, 128)'
+          }
           if (value === 0 || x === y) {
+            if (matrix[y][x].isScc) {
+              return 'rgb(230, 184, 0)'
+            }
             return 'none'
           }
           if (y > x) {
@@ -131,7 +126,7 @@ const dsm = (data) => {
         .attr('x', 0.5)
         .attr('y', 0.5)
         .attr('dy', '0.2em')
-        .text((xNode, x) => matrix[y][x] || '')
+        .text((xNode, x) => matrix[y][x].deps || '')
     })
 }
 
@@ -145,7 +140,6 @@ const parse = (data) => {
       node.parent = path === '/' ? null : buildPath(dirname(path))
       if (node.parent) {
         node.parent.children.push(node)
-        node.parent._depth = 0
       }
     }
     return nodes[path]
@@ -154,7 +148,6 @@ const parse = (data) => {
   for (const filename of Object.keys(data.files)) {
     const file = data.files[filename]
     const node = buildPath(filename)
-    node._depth = file.depth
     for (const dependency of Object.keys(file.children)) {
       node.dependOn(buildPath(dependency))
     }
