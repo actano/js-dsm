@@ -8,11 +8,14 @@ const webpackConfig = {
   module: {
     loaders: [
       {
-        test: /\.js$/,
+        test: /\.(js|jsx)$/,
         exclude: /node_modules/,
         loader: 'babel-loader',
       },
     ],
+  },
+  resolve: {
+    extensions: ['', '.js', '.jsx'],
   },
 }
 
