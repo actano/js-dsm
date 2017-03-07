@@ -85,15 +85,34 @@ const dsm = (data) => {
     .attr('width', totalSize)
     .attr('height', totalSize)
 
-  chart.append('g').attr('class', 'axisLeft').attr('transform', `translate(${headWidth},0)`)
+  const toggleNode = (node) => {
+      node.expanded = !node.expanded
+  }
+
+  chart.append('g').attr('class', 'axisLeft').attr('transform', `translate(${headWidth - 14},0)`)
     .selectAll('g')
     .data(yScale.domain())
     .enter()
     .append('g')
     .attr('transform', node => `translate(0,${yScale(node) + (yScale.step() / 2)})`)
-    .append('text')
-    .attr('dx', '-0.5em')
-    .text(node => node.path)
+    .each((node, i, groups) => {
+      const group = d3.select(groups[i])
+
+      group
+        .append('text')
+        .attr('dx', '-0.5em')
+        .text(node.path)
+
+      group
+        .append('rect')
+        .attr('width', 10)
+        .attr('height', 10)
+        .attr('y', -5)
+        .attr('fill-opacity', 0)
+        .attr('stroke', 'black')
+        .attr('stroke-width', 1)
+        .on('click', toggleNode)
+    })
 
   chart.append('g').attr('class', 'axisTop').attr('transform', `translate(0,${headWidth})`)
     .selectAll('g')
