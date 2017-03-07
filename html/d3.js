@@ -110,7 +110,7 @@ const dsm = (data) => {
           if (x === y) {
             return 'rgb(128, 128, 128)'
           }
-          if (value === 0 || x === y) {
+          if (value === 0) {
             if (matrix[y][x].isScc) {
               return 'rgb(230, 184, 0)'
             }
