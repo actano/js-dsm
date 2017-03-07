@@ -2,6 +2,7 @@ import 'babel-polyfill'
 import * as d3 from 'd3' // eslint-disable-line import/no-unresolved, import/extensions
 import { interpolateReds, interpolateGreens } from 'd3-scale-chromatic'
 import { dirname, basename } from 'path'
+import { tap, flow, reject, filter, map, find, concat, flatMap, take } from 'lodash/fp'
 import createLowerLeftDsm from './dsm'
 
 class Node {
@@ -40,13 +41,24 @@ class Node {
   }
 }
 
+function collectLeafs(node) {
+  if (node.children.length) {
+    return flatMap(collectLeafs, node.children)
+  }
+
+  return node
+}
+
+const isTestFile = node => /^.*\/test\/.*$/.test(node.path)
+
 const dsm = (data) => {
   const { root } = data
 
-  const selection = []
-  for (const node of root.children) {
-    selection.push(...node.children)
-  }
+  const selection = flow(
+    collectLeafs,
+    reject(isTestFile),
+    take(500),
+  )(root)
 
   const headWidth = 80
   const cellSize = 20
