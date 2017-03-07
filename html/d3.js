@@ -12,6 +12,7 @@ class Node {
     this.children = []
     this.dependencies = []
     this.reverseDependencies = []
+    this.expanded = false
   }
 
   get path() {
@@ -42,17 +43,18 @@ class Node {
 }
 
 function collectLeafs(node) {
-  if (node.children.length) {
+  if (node.children.length && node.expanded) {
     return flatMap(collectLeafs, node.children)
   }
 
-  return node
+  return [node]
 }
 
 const isTestFile = node => /^.*\/test\/.*$/.test(node.path)
 
 const dsm = (data) => {
   const { root } = data
+  root.name = '/'
 
   const selection = flow(
     collectLeafs,
