@@ -26,6 +26,14 @@ class Node {
     }
   }
 
+  cachedDeps() {
+    if (!this._deps) {
+      this._deps = Array.from(this.allDependencies())
+    }
+
+    return this._deps
+  }
+
   isChildOf(node) {
     if (this === node) return true
     if (this.parent === null) return false

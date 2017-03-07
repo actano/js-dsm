@@ -9,7 +9,7 @@ const sortBy = iteratees => collection => _sortBy(collection, iteratees)
 const deps = (fromNode, toNode) => {
   if (fromNode === toNode) return NaN
   let result = 0
-  for (const dep of fromNode.allDependencies()) {
+  for (const dep of fromNode.cachedDeps()) {
     if (dep.isChildOf(toNode)) result += 1
   }
   return result
