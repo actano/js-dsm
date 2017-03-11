@@ -11,6 +11,11 @@ const webpackConfig = {
         test: /\.js$/,
         exclude: /node_modules/,
         loader: 'babel-loader',
+        query: {
+          presets: [
+            ['env', { targets: { browsers: ['last 2 versions'] } }],
+          ],
+        },
       },
     ],
   },
