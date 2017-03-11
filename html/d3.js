@@ -1,4 +1,5 @@
 import 'babel-polyfill'
+import { json as graphJson } from 'graphlib'
 import * as d3 from 'd3' // eslint-disable-line import/no-unresolved, import/extensions
 import { interpolateReds, interpolateGreens } from 'd3-scale-chromatic'
 import { dirname, basename } from 'path'
@@ -130,14 +131,14 @@ const dsm = (data) => {
     })
 }
 
-const parse = (data) => {
+const parse = (graph) => {
   const nodes = {}
 
   const buildPath = (path) => {
     if (!nodes[path]) {
       const node = new Node(path)
       nodes[path] = node
-      node.parent = path === '/' ? null : buildPath(dirname(path))
+      node.parent = path === '.' ? null : buildPath(dirname(path))
       if (node.parent) {
         node.parent.children.push(node)
       }
@@ -145,17 +146,15 @@ const parse = (data) => {
     return nodes[path]
   }
 
-  for (const filename of Object.keys(data.files)) {
-    const file = data.files[filename]
+  for (const filename of graph.nodes()) {
     const node = buildPath(filename)
-    for (const dependency of Object.keys(file.children)) {
-      node.dependOn(buildPath(dependency))
+    for (const dependency of graph.outEdges(filename)) {
+      const { w } = dependency
+      node.dependOn(buildPath(w))
     }
   }
 
-  const cycles = data.cycles.map(cycle => cycle.map(buildPath))
-
-  let root = nodes['/']
+  let root = nodes['.']
   while (root.children.length === 1) {
     root = root.children[0]
   }
@@ -163,12 +162,12 @@ const parse = (data) => {
   root.parent = null
   root.name = ''
 
-  return { root, cycles }
+  return { root }
 }
 
 d3.json('dependencies.json', (error, data) => {
   if (error) {
     throw error
   }
-  dsm(parse(data))
+  dsm(parse(graphJson.read(data)))
 })

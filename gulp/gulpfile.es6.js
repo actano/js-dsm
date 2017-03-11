@@ -1,4 +1,4 @@
-import { relative } from 'path'
+import { alg } from 'graphlib'
 
 import gulp from 'gulp'
 import { log, colors } from 'gulp-util'
@@ -10,12 +10,11 @@ const { red } = colors
 
 
 gulp.task('default', ['dependencies.json', 'html', 'watch'], () => {
-  const result = getDependencies()
+  const graph = getDependencies()
+  const cycles = alg.findCycles(graph)
 
-  const relativePath = s => relative(result.base, s)
-
-  log('Found %s cycles', red(`${result.cycles.length}`))
-  for (const cycle of result.cycles) {
-    log('%s', cycle.map(relativePath).join(' -> '))
+  log('Found %s cycles', red(`${cycles.length}`))
+  for (const cycle of cycles) {
+    log('%s', cycle.join(' -> '))
   }
 })
