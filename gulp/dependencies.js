@@ -1,14 +1,15 @@
 import esprima from 'esprima'
 import Module, { _resolveFilename } from 'module'
 
-import { log, colors } from 'gulp-util'
-
-const { red, gray } = colors
+export const ERROR_TOO_MANY_ARGUMENTS = 'TOO_MANY_ARGUMENTS'
+export const ERROR_ARGUMENT_NOT_LITERAL = 'ARGUMENT_NOT_LITERAL'
+export const ERROR_MODULE_NOT_FOUND = 'MODULE_NOT_FOUND'
 
 const isRelative = module => module.startsWith('/') || module.startsWith('./') || module.startsWith('../')
 
-export function* walk(module, ast) {
+function* walk(module, ast) {
   const range = _range => module.src.substring(_range[0], _range[1]).replace(/\n([\s\S]*)$/, ' …')
+  const createError = type => ({ type, filename: module.filename, range: range(ast.range) })
 
   if (!ast) return
   if (Array.isArray(ast)) {
@@ -25,17 +26,17 @@ export function* walk(module, ast) {
     (ast.callee.type === 'Identifier') &&
     (ast.callee.name === 'require')) {
     if (ast.arguments.length !== 1) {
-      log('%s: Expected only one argument: %s', red(module.filename), gray(range(ast.range)))
+      yield createError(ERROR_TOO_MANY_ARGUMENTS)
     }
     const argument = ast.arguments[0]
     if (argument.type !== 'Literal') {
-      log('%s: Expected literal argument: %s', red(module.filename), gray(range(ast.range)))
+      yield createError(ERROR_ARGUMENT_NOT_LITERAL)
     } else if (isRelative(argument.value)) {
       try {
         yield _resolveFilename(argument.value, module)
       } catch (e) {
-        if (e.code === 'MODULE_NOT_FOUND') {
-          log('%s: Cannot resolve: %s', red(module.filename), gray(range(ast.range)))
+        if (e.code === ERROR_MODULE_NOT_FOUND) {
+          yield createError(e.code)
         } else {
           throw e
         }
@@ -44,15 +45,10 @@ export function* walk(module, ast) {
   }
 }
 
-export function* parse(filename, contents) {
+export default function* yieldDependencies(filename, contents) {
   const module = new Module(filename, null)
   module.filename = filename
   module.src = String(contents)
-  try {
-    const ast = esprima.parse(module.src, { range: true })
-    yield* walk(module, ast)
-  } catch (e) {
-    log('cannot parse %s: %s', red(module.filename), e.toString())
-  }
+  const ast = esprima.parse(module.src, { range: true })
+  yield* walk(module, ast)
 }
-

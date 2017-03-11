@@ -3,7 +3,7 @@ import { resolve, delimiter, relative } from 'path'
 import { Graph, json as graphJson } from 'graphlib'
 import gulp from 'gulp'
 import { obj } from 'through2'
-import { File } from 'gulp-util'
+import { File, log, colors } from 'gulp-util'
 import coffee from 'gulp-coffee'
 import babel from 'gulp-babel'
 import shebang from 'gulp-strip-shebang'
@@ -11,7 +11,9 @@ import streamify from 'stream-array'
 
 import jade from './local-gulp-pug'
 import stylus from './gulp-stylus'
-import { parse } from './dependencies'
+import yieldDependencies, { ERROR_MODULE_NOT_FOUND, ERROR_ARGUMENT_NOT_LITERAL, ERROR_TOO_MANY_ARGUMENTS } from './dependencies'
+
+const { red, gray } = colors
 
 const TARGET = resolve(process.env.TARGET || process.cwd())
 
@@ -22,6 +24,24 @@ const recordDependencies = (filename, iterator) => {
   for (const target of iterator) {
     const targetId = relative(TARGET, target)
     graph.setEdge(srcId, targetId)
+  }
+}
+
+function* parse(filename, contents) {
+  try {
+    for (const action of yieldDependencies(filename, contents)) {
+      if (action.type === ERROR_MODULE_NOT_FOUND) {
+        log('%s: Cannot resolve: %s', red(action.filename), gray(action.range))
+      } else if (action.type === ERROR_ARGUMENT_NOT_LITERAL) {
+        log('%s: Expected literal argument: %s', red(action.filename), gray(action.range))
+      } else if (action.type === ERROR_TOO_MANY_ARGUMENTS) {
+        log('%s: Expected only one argument: %s', red(action.filename), gray(action.range))
+      } else {
+        yield action
+      }
+    }
+  } catch (e) {
+    log('cannot parse %s: %s', red(module.filename), e.toString())
   }
 }
 
