@@ -3,8 +3,6 @@ import Module, { _resolveFilename } from 'module'
 
 import { log, colors } from 'gulp-util'
 
-import './gulpfile-html'
-
 const { red, gray } = colors
 
 const isRelative = module => module.startsWith('/') || module.startsWith('./') || module.startsWith('../')
