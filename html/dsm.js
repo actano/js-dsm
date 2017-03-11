@@ -1,7 +1,7 @@
 import { alg as graphAlg } from 'graphlib'
-import flatMap from 'lodash.flatmap'
-import _sortBy from 'lodash.sortby'
-import flow from 'lodash.flow'
+import flatMap from 'lodash/flatMap'
+import _sortBy from 'lodash/sortBy'
+import flow from 'lodash/flow'
 import { graphFromAdjacency, condense } from './graph'
 
 const sortBy = iteratees => collection => _sortBy(collection, iteratees)

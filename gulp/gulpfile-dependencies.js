@@ -1,5 +1,5 @@
-import isUndefined from 'lodash.isundefined'
-import uniqBy from 'lodash.uniqby'
+import isUndefined from 'lodash/isUndefined'
+import uniqBy from 'lodash/uniqBy'
 import { resolve, delimiter } from 'path'
 
 import gulp from 'gulp'

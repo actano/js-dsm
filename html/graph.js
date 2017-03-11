@@ -1,6 +1,6 @@
 import assert from 'assert'
 import { Graph, json as graphJson, alg as graphAlg } from 'graphlib'
-import sortBy from 'lodash.sortby'
+import sortBy from 'lodash/sortBy'
 
 export function graphFromAdjacency(matrix, ids) {
   assert(matrix.length === ids.length, 'mismatch between matrix and ids')
