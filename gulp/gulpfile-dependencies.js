@@ -11,7 +11,7 @@ import streamify from 'stream-array'
 
 import jade from './local-gulp-pug'
 import stylus from './gulp-stylus'
-import yieldDependencies, { ERROR_MODULE_NOT_FOUND, ERROR_ARGUMENT_NOT_LITERAL, ERROR_TOO_MANY_ARGUMENTS } from './dependencies'
+import yieldDependencies, { ERROR_MODULE_NOT_FOUND, ERROR_ARGUMENT_NOT_LITERAL, ERROR_TOO_MANY_ARGUMENTS } from '../lib/dependencies'
 
 const { red, gray } = colors
 
