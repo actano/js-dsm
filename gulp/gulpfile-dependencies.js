@@ -1,4 +1,4 @@
-import { resolve, delimiter, dirname, relative } from 'path'
+import { resolve, delimiter, relative } from 'path'
 
 import { Graph, json as graphJson } from 'graphlib'
 import gulp from 'gulp'
@@ -17,23 +17,10 @@ const TARGET = resolve(process.env.TARGET || process.cwd())
 
 let graph = null
 
-const ensureNode = (filename) => {
-  if (!graph.hasNode(filename)) {
-    graph.setNode(filename)
-    const dir = dirname(filename)
-    if (dir !== '.') {
-      ensureNode(dir)
-      graph.setParent(filename, dir)
-    }
-  }
-}
-
 const recordDependencies = (filename, iterator) => {
   const srcId = relative(TARGET, filename)
-  ensureNode(srcId)
   for (const target of iterator) {
     const targetId = relative(TARGET, target)
-    ensureNode(targetId)
     graph.setEdge(srcId, targetId)
   }
 }
@@ -52,7 +39,7 @@ const dataDependencies = () => obj((file, enc, callback) => {
 })
 
 gulp.task('reset', () => {
-  graph = new Graph({ directed: true, compound: true })
+  graph = new Graph({ directed: true })
 })
 
 const src = (type) => {
