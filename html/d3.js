@@ -2,7 +2,7 @@ import 'babel-polyfill'
 import { json as graphJson } from 'graphlib'
 import * as d3 from 'd3'
 import { interpolateReds, interpolateGreens } from 'd3-scale-chromatic'
-import { createLowerLeftDsmFromGraph } from './dsm'
+import createLowerLeftDsmFromGraph from '../lib/dsm'
 import autoSelection from '../lib/auto-selection'
 import aggregateGraph from '../lib/aggregate-graph'
 
