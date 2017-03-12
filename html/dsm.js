@@ -2,22 +2,11 @@ import { alg as graphAlg } from 'graphlib'
 import flatMap from 'lodash/flatMap'
 import _sortBy from 'lodash/sortBy'
 import flow from 'lodash/flow'
-import { graphFromAdjacency, condense } from './graph'
+import { condense } from './graph'
 
 const sortBy = iteratees => collection => _sortBy(collection, iteratees)
 
-const deps = (fromNode, toNode) => {
-  if (fromNode === toNode) return NaN
-  let result = 0
-  for (const dep of fromNode.allDependencies()) {
-    if (dep.isChildOf(toNode)) result += 1
-  }
-  return result
-}
-
-export default function createLowerLeftDsm(nodes) {
-  const dependencyMatrix = nodes.map(y => nodes.map(x => deps(x, y)))
-  const dependencyGraph = graphFromAdjacency(dependencyMatrix, nodes.map(x => x.toString()))
+export default (dependencyGraph) => {
   const { condensedGraph, condensationToGraph, sccs } = condense(dependencyGraph)
   const condensedOrder = graphAlg.topsort(condensedGraph)
   const orderedClusters = condensedOrder.map(x => condensationToGraph[x])
@@ -43,14 +32,14 @@ export default function createLowerLeftDsm(nodes) {
   ))
   const sccOfNode = node => sccs.find(contains(node.toString()))
 
-  const sortedNodes = sortBy(node => order.indexOf(node.toString()))(nodes)
+  const sortedNodes = sortBy(node => order.indexOf(node.toString()))(dependencyGraph.nodes())
   const matrix = sortedNodes.map((y) => {
     const sccOfY = sccOfNode(y)
 
     return sortedNodes.map((x) => {
       const isScc = sccOfY.length > 1 && sccOfNode(x) === sccOfY
       return {
-        deps: deps(x, y),
+        deps: dependencyGraph.edge(x, y) || 0,
         isScc,
       }
     })

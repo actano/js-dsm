@@ -38,5 +38,5 @@ gulp.task('html', ['html-js', 'html-css'], () =>
     .pipe(gulp.dest('build')))
 
 gulp.task('watch', () => {
-  gulp.watch('html/**', ['html'])
+  gulp.watch(['html/**', 'lib/**'], ['html'])
 })

@@ -1,58 +1,18 @@
 import 'babel-polyfill'
 import { json as graphJson } from 'graphlib'
-import * as d3 from 'd3' // eslint-disable-line import/no-unresolved, import/extensions
+import * as d3 from 'd3'
 import { interpolateReds, interpolateGreens } from 'd3-scale-chromatic'
-import { dirname, basename } from 'path'
-import createLowerLeftDsm from './dsm'
+import { createLowerLeftDsmFromGraph } from './dsm'
+import autoSelection from '../lib/auto-selection'
+import aggregateGraph from '../lib/aggregate-graph'
 
-class Node {
-  constructor(path) {
-    this.parent = null
-    this.name = basename(path)
-    this.children = []
-    this.dependencies = []
-    this.reverseDependencies = []
-  }
-
-  get path() {
-    return this.parent ? `${this.parent.path}/${this.name}` : this.name
-  }
-
-  dependOn(node) {
-    this.dependencies.push(node)
-    node.reverseDependencies.push(this)
-  }
-
-  * allDependencies() {
-    yield* this.dependencies
-    for (const child of this.children) {
-      yield* child.allDependencies()
-    }
-  }
-
-  isChildOf(node) {
-    if (this === node) return true
-    if (this.parent === null) return false
-    return this.parent.isChildOf(node)
-  }
-
-  toString() {
-    return `${this.path}`
-  }
-}
-
-const dsm = (data) => {
-  const { root } = data
-
-  const selection = []
-  for (const node of root.children) {
-    selection.push(...node.children)
-  }
-
+const dsm = (graph) => {
+  const selection = autoSelection(graph)
+  const aggregatedGraph = aggregateGraph(graph, selection)
+  const { matrix, dsmNodes } = createLowerLeftDsmFromGraph(aggregatedGraph)
   const headWidth = 80
   const cellSize = 20
-  const totalSize = headWidth + (selection.length * cellSize)
-  const { matrix, dsmNodes } = createLowerLeftDsm(selection)
+  const totalSize = headWidth + (dsmNodes.length * cellSize)
   const xAxisData = dsmNodes
   const yAxisData = dsmNodes
 
@@ -80,7 +40,7 @@ const dsm = (data) => {
     .attr('transform', node => `translate(0,${yScale(node) + (yScale.step() / 2)})`)
     .append('text')
     .attr('dx', '-0.5em')
-    .text(node => node.path)
+    .text(node => node)
 
   chart.append('g').attr('class', 'axisTop').attr('transform', `translate(0,${headWidth})`)
     .selectAll('g')
@@ -91,7 +51,7 @@ const dsm = (data) => {
     .append('text')
     .attr('transform', 'rotate(-90)')
     .attr('dx', '0.5em')
-    .text(node => node.path)
+    .text(node => node)
 
   chart.append('g').attr('class', 'table')
     .selectAll('g')
@@ -131,43 +91,9 @@ const dsm = (data) => {
     })
 }
 
-const parse = (graph) => {
-  const nodes = {}
-
-  const buildPath = (path) => {
-    if (!nodes[path]) {
-      const node = new Node(path)
-      nodes[path] = node
-      node.parent = path === '.' ? null : buildPath(dirname(path))
-      if (node.parent) {
-        node.parent.children.push(node)
-      }
-    }
-    return nodes[path]
-  }
-
-  for (const filename of graph.nodes()) {
-    const node = buildPath(filename)
-    for (const dependency of graph.outEdges(filename)) {
-      const { w } = dependency
-      node.dependOn(buildPath(w))
-    }
-  }
-
-  let root = nodes['.']
-  while (root.children.length === 1) {
-    root = root.children[0]
-  }
-
-  root.parent = null
-  root.name = ''
-
-  return { root }
-}
-
 d3.json('dependencies.json', (error, data) => {
   if (error) {
     throw error
   }
-  dsm(parse(graphJson.read(data)))
+  dsm(graphJson.read(data))
 })
