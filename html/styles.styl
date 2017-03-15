@@ -1,17 +1,34 @@
-.chart
-  text
-    font 5px sans-serif
+h1
+  clear both
 
-  .axisLeft text
-    text-anchor end
 
-  .axisTop text
-    text-anchor start
+.column
+  height 150px
+  width 150px
+  float left
+  border 2px solid #666666
+  background-color #ccc
+  margin-right 5px
+  border-radius 10px
+  box-shadow inset 0 0 3px #000
+  text-align center
 
-  .table
-    text
-      text-anchor middle
+.column--dragging
+  opacity 0.4
 
-    rect
-      stroke #eee
-      stroke-width 0.5px
+.column--over
+  border 2px dashed #000
+
+[draggable]
+  cursor grab
+  user-select none
+
+.column header
+  color #fff
+  text-shadow #000 0 1px
+  box-shadow 5px
+  padding 5px
+  background linear-gradient(to right, rgb(0,0,0), rgb(79,79,79), rgb(21,21,21))
+  border-bottom 1px solid #ddd
+  border-top-left-radius 10px
+  border-top-right-radius 10px
