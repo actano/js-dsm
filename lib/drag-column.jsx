@@ -13,7 +13,7 @@ export default class DragColumn extends React.PureComponent {
       handleDragStart(e, {
         'text/plain': 'test',
         'text/x-test': 'test',
-      })
+      }, EFFECT_LINK, EFFECT_COPY)
     }
 
     const _handleDragEnd = (e) => {
