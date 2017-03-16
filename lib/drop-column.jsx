@@ -1,5 +1,5 @@
 import React from 'react'
-import { handleDragOver, handleDragEnter, handleDragLeave, handleDrop } from './dnd'
+import { EFFECT_LINK, EFFECT_COPY, handleDragOver, handleDragEnter, handleDragLeave, handleDrop } from './dnd'
 
 export default class DropColumn extends React.PureComponent {
   constructor() {
@@ -9,12 +9,12 @@ export default class DropColumn extends React.PureComponent {
 
   render() {
     const _handleDragOver = (e) => {
-      const dropEffect = handleDragOver(e)
+      const dropEffect = handleDragOver(e, EFFECT_LINK, EFFECT_COPY)
       this.setState({ dropEffect })
     }
 
     const _handleDragEnter = (e) => {
-      const dropEffect = handleDragEnter(e)
+      const dropEffect = handleDragEnter(e, EFFECT_LINK, EFFECT_COPY)
       this.setState({ dropEffect })
     }
 
@@ -24,7 +24,7 @@ export default class DropColumn extends React.PureComponent {
     }
 
     const _handleDrop = (e) => {
-      const dndEffect = handleDrop(e)
+      const dndEffect = handleDrop(e, EFFECT_LINK, EFFECT_COPY)
       const dropEffect = this.state.dropEffect || dndEffect
       this.setState({ dropEffect: null })
       if (!dropEffect) return
