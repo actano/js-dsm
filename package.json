@@ -8,10 +8,10 @@
     "test": "eslint gulp html"
   },
   "devDependencies": {
-    "babel-core": "^6.23.1",
+    "babel-core": "^6.26.3",
     "babel-loader": "^6.3.2",
-    "babel-preset-env": "^1.1.8",
-    "babel-register": "^6.23.0",
+    "babel-preset-env": "^1.6.1",
+    "babel-register": "^6.26.0",
     "eslint": "3",
     "eslint-config-actano": "^6.0.0",
     "eslint-plugin-import": "^2.2.0",
@@ -34,7 +34,7 @@
     "webpack-stream": "^3.2.0"
   },
   "dependencies": {
-    "babel-polyfill": "^6.23.0",
+    "babel-polyfill": "^6.26.0",
     "d3": "^4.6.0",
     "d3-scale-chromatic": "^1.1.1",
     "graphlib": "^2.1.1",
