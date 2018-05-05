@@ -93,7 +93,7 @@ gulp.task('styl', ['reset'], () => src('styl')
 gulp.task('dependencies', ['js', 'coffee', 'pug', 'styl'])
 
 gulp.task('dependencies.json', ['dependencies'], () => {
-  const contents = new Buffer(JSON.stringify(graphJson.write(graph)))
+  const contents = Buffer.from(JSON.stringify(graphJson.write(graph)))
   const json = new File({ contents })
   json.base = process.cwd()
   json.path = resolve(json.base, 'dependencies.json')
