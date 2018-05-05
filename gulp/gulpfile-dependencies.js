@@ -41,7 +41,7 @@ function* parse(filename, contents) {
       }
     }
   } catch (e) {
-    log('cannot parse %s: %s', red(module.filename), e.toString())
+    log('cannot parse %s: %s', red(filename), e.toString())
   }
 }
 
