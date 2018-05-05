@@ -91,9 +91,8 @@ const dsm = (graph) => {
     })
 }
 
-d3.json('dependencies.json', (error, data) => {
-  if (error) {
-    throw error
-  }
+d3.json('dependencies.json').then((data) => {
   dsm(graphJson.read(data))
+}).catch((e) => {
+  throw e
 })
